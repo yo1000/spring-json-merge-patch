@@ -1,5 +1,8 @@
 package com.yo1000.spring.json.mergepatch;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.ObjectReader;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -13,6 +16,12 @@ public class UserRestController {
             7
     );
 
+    private final ObjectMapper objectMapper;
+
+    public UserRestController(ObjectMapper objectMapper) {
+        this.objectMapper = objectMapper;
+    }
+
     @GetMapping(path = "/{id}")
     public User get(@PathVariable("id") Integer id) {
         if (!id.equals(user.getId())) {
@@ -22,35 +31,12 @@ public class UserRestController {
         return user;
     }
 
+    // Refer from https://stackoverflow.com/a/65649814/5610904
     @PatchMapping(path = "/{id}", consumes = "application/merge-patch+json")
-    public User patch(@PathVariable("id") Integer id, @RequestBody UserPatchRequest patch) {
-        if (!id.equals(user.getId())) {
-            return null;
-        }
+    public User patch(@PathVariable("id") Integer id, @RequestBody String json) throws JsonProcessingException {
+        ObjectReader reader = objectMapper.readerForUpdating(user);
 
-        if (patch.getUsername() != null) {
-            patch.getUsername().ifPresentOrElse(
-                    user::setUsername,
-                    () -> user.setUsername(null));
-        }
-
-        if (patch.getFamilyName() != null) {
-            patch.getFamilyName().ifPresentOrElse(
-                    user::setFamilyName,
-                    () -> user.setFamilyName(null));
-        }
-
-        if (patch.getGivenName() != null) {
-            patch.getGivenName().ifPresentOrElse(
-                    user::setGivenName,
-                    () -> user.setGivenName(null));
-        }
-
-        if (patch.getAge() != null) {
-            patch.getAge().ifPresentOrElse(
-                    user::setAge,
-                    () -> user.setAge(null));
-        }
+        user = reader.readValue(json);
 
         return user;
     }
