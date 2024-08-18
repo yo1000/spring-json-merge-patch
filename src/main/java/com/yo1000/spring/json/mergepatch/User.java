@@ -1,7 +1,10 @@
 package com.yo1000.spring.json.mergepatch;
 
+import jakarta.validation.constraints.Pattern;
+
 public class User {
     private Integer id;
+    @Pattern(regexp = "^[0-9A-Za-z]+$")
     private String username;
     private String familyName;
     private String givenName;

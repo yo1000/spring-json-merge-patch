@@ -34,7 +34,7 @@ public class UserRestController {
     // Refer from https://stackoverflow.com/a/65649814/5610904
     @PatchMapping(path = "/{id}", consumes = "application/merge-patch+json")
     public User patch(@PathVariable("id") Integer id, @RequestBody String json) throws JsonProcessingException {
-        ObjectReader reader = objectMapper.readerForUpdating(user);
+        ObjectReader reader = new ValidatableObjectReader(objectMapper.readerForUpdating(user));
 
         user = reader.readValue(json);
 
